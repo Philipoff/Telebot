@@ -1,0 +1,41 @@
+import telebot
+import requests
+
+token = "933498089:AAHf5NQGnL53mckLs4uCSyF7A-Rso55eMKE"
+
+# Обходим блокировку с помощью прокси
+telebot.apihelper.proxy = {'https': 'socks5h://geek:socks@t.geekclass.ru:7777'}
+
+# подключаемся к телеграму
+bot = telebot.TeleBot(token=token)
+
+# content_types=['text'] - сработает, если нам прислали текстовое сообщение
+@bot.message_handler(content_types=['text'])
+def echo(message):
+    # message - входящее сообщение
+    # message.text - это его текст
+    # message.chat.id - это номер его автора
+    text = message.text
+    user = message.chat.id
+
+    # отправляем картинку с попугаем
+    # bot.send_photo(user, "https://i.ytimg.com/vi/R-RbmqzRC9c/maxresdefault.jpg")
+    if text == '/help' or text == '/start':
+        bot.send_message(user, 'Пока что данный бот умеет только травить анекдоты: /anek')
+    if text == '/anek':
+        bot.send_message(user, get_humor())
+
+
+def get_humor():
+    site = requests.get('https://nekdo.ru/random/').text
+    ind1 = str(site).index('<div class="text" id=', 0, 100000)
+    ind2 = str(site).index('</div>', ind1, 100000)
+    anek = site[ind1 + 24:ind2]
+    anekind = anek.index('>')
+    anek = anek[anekind + 1:].split('<br>')
+    anek = '\n'.join(anek)
+    return anek
+
+
+# поллинг - вечный цикл с обновлением входящих сообщений
+bot.polling(none_stop=True)
