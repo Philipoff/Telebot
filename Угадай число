@@ -1,35 +1,31 @@
 import telebot
 from random import randint
-
+telebot.apihelper.proxy = {'https': 'socks5h://geek:socks@t.geekclass.ru:7777'}
 token = "933498089:AAHf5NQGnL53mckLs4uCSyF7A-Rso55eMKE"
 
-# Обходим блокировку с помощью прокси
-telebot.apihelper.proxy = {'https': 'socks5h://geek:socks@t.geekclass.ru:7777'}
-
-# подключаемся к телеграму
 bot = telebot.TeleBot(token=token)
+notes = {}
 
 
 @bot.message_handler(content_types=['text'])
-def echo(message):
+def game(message):
     text = message.text
     user = message.chat.id
-
     if text == '/start':
         start(user)
     if text.isdigit():
-        if int(text) == num:
+        if int(text) == notes[user]:
             start(user)
-        elif int(text) < num:
+            bot.send_message(user, 'Молодец!')
+        elif int(text) < notes[user]:
             bot.send_message(user, 'Больше')
         else:
             bot.send_message(user, 'Меньше')
 
 
 def start(user):
-    global num
+    notes[user] = randint(1, 101)
     bot.send_message(user, 'Я загадал число. Оно находится в прпомежутке от 1 до 100.')
-    num = randint(1, 101)
 
 
 # поллинг - вечный цикл с обновлением входящих сообщений
